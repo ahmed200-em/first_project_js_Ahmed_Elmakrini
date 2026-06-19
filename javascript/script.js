@@ -19,8 +19,18 @@ switch (action) {
         .join(' ')
       return correctedName
     }
+    // ! this function for valid email verification
+    function validEmail (email) {
+      if (!email) return 'Email cannot be empty.'
+      email = email.trim().toLowerCase()
+      if (email.length < 10) return 'Email must contain at least 10 characters.'
+      if (!email.includes('@')) return 'Email must contain @'
+      return email
+    }
     let fullName
+    let email
     let step = 1
+
     while (true) {
       // ?this step 1 for name 
       if (step === 1) {
@@ -34,7 +44,19 @@ switch (action) {
           alert(result)
         }
       }
+      // ?this step for the email 
+      else if (step === 2) {
+        email = prompt('Please enter your email:')
+        let result = validEmail(email)
+        if (!result.includes('Email')) {
+          email = result
+          break // stop loop here
+        } else {
+          alert(result)
+        }
+      }
     }
+    console.log('User saved:', users)
     break
   case '2':
   case 'Exit':
