@@ -56,6 +56,11 @@ switch (action) {
         }
       }
     }
+    // todo this to save the user information
+    users.push({
+      fullName: fullName,
+      email: email
+    })
     console.log('User saved:', users)
     break
   case '2':
