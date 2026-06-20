@@ -61,6 +61,7 @@ while (true) {
         if (Number(age) < 16) return 'Age must be at least 16.'
         return Number(age)
       }
+
       let fullName
       let email
       let age
@@ -138,8 +139,40 @@ while (true) {
         console.log('User saved:', users)
       }
       break
+    // todo login case
     case '2':
-
+    case 'Login In':
+    case 'login in':
+    case 'login':
+      let cas = 1
+      let emailLogin
+      let passwordLogin
+      while (true) {
+        // ? step 1 for the email to login loop
+        if (cas === 1) {
+          emailLogin = prompt('Please enter your email:')
+          if (goBack(emailLogin)) break
+          let userExists = users.some(user => user.email === emailLogin)
+          if (!userExists) {
+            alert("email doesn't exist, try to sign up")
+            break
+          } else {
+            cas = 2
+          }
+          // ? step 2 for the password to login loop
+        } else if (cas === 2) {
+          passwordLogin = prompt('Please enter your password:')
+          if (goBack(passwordLogin)) break
+          let user = users.find(user => user.email === emailLogin)
+          if (user.password !== passwordLogin) {
+            alert('Password incorrect')
+          } else {
+            alert('login successful')
+            break
+          }
+        }
+      }
+      break
       let user
       while (true) {
         let emailToChange = prompt('Enter your email:')
