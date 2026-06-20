@@ -173,6 +173,10 @@ while (true) {
         }
       }
       break
+    // todo changing password case
+    case '3':
+    case 'Change Password':
+    case 'change password':
       let user
       while (true) {
         let emailToChange = prompt('Enter your email:')
@@ -208,6 +212,10 @@ while (true) {
         }
       }
       break
+    // todo changing password case
+    case '3':
+    case 'Change Password':
+    case 'change password':
     // todo exit case
     case '4':
     case 'Exit':
