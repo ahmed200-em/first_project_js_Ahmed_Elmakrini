@@ -1,8 +1,16 @@
 let users = JSON.parse(localStorage.getItem('users')) || []
 while (true) {
-  let action = prompt(
-    'Welcome! Choose an option:\n1. Sign Up\n2. Login In\n3. Change Password \n4. Exit'
-  )
+  let action = prompt(`
+                  ╔════════════════════╗
+                  ║🏦 WELCOME TO MY BANK 🏦 ║ 
+                  ╠════════════════════╣
+                  ║ 1. 📝 Sign Up            
+                  ║ 2. 🔐 Log In             
+                  ║ 3. 🔑 Change Password    
+                  ║ 4. 🚪 Exit               
+                  ╚════════════════════╝
+                  Type the number of your choice:
+`)
   // ! this function for exit where ever was typed will exit
   function goBack (input) {
     return input === 'exit' || input === 'Exit' || input === 'EXIT'
@@ -133,10 +141,10 @@ while (true) {
           fullName: fullName,
           email: email,
           age: age,
-          password: password
+          password: password,
+          balance: 1000
         })
         localStorage.setItem('users', JSON.stringify(users))
-        console.log('User saved:', users)
       }
       break
     // todo login case
@@ -147,6 +155,9 @@ while (true) {
       let cas = 1
       let emailLogin
       let passwordLogin
+      let loggedInUser = null
+      // let user
+      let loginSuccess = false
       while (true) {
         // ? step 1 for the email to login loop
         if (cas === 1) {
@@ -168,8 +179,33 @@ while (true) {
             alert('Password incorrect')
           } else {
             alert('login successful')
+            loggedInUser = user
+            loginSuccess = true
             break
           }
+        }
+      }
+      if (loginSuccess) {
+        while (true) {
+          let loginMenu = prompt(`
+                    ╔════════════════════╗
+                    ║    🏦 BANK DASHBOARD 🏦 
+                    ╠════════════════════╣
+                    ║ 👤Customer:  ${loggedInUser.fullName}
+                    ║ 💰Balance :  ${loggedInUser.balance} Dirhams
+                    ╠════════════════════╣
+                    ║   1. 💸 Withdraw
+                    ║   2. 💵 Deposit
+                    ║   3. 🏦 Take a Loan
+                    ║   4. 📈 Invest
+                    ║   5. 📜 History
+                    ║   6. 🚪 Logout
+                    ╚════════════════════╝
+                          Enter your choice:
+          `)
+          if (loginMenu === '6' || loginMenu.toLowerCase() === 'logout') {
+            break
+          } 
         }
       }
       break
@@ -212,10 +248,6 @@ while (true) {
         }
       }
       break
-    // todo changing password case
-    case '3':
-    case 'Change Password':
-    case 'change password':
     // todo exit case
     case '4':
     case 'Exit':
@@ -225,7 +257,8 @@ while (true) {
     default:
       alert('Invalid option! Returning to menu...')
   }
-  if (action === '3' || action === 'exit' || action === 'Exit') {
+  if (action === '4' || action === 'exit' || action === 'Exit') {
     break
   }
 }
+console.log('User saved:', users)
