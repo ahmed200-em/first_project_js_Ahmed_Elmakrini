@@ -205,7 +205,37 @@ while (true) {
           `)
           if (loginMenu === '6' || loginMenu.toLowerCase() === 'logout') {
             break
-          } 
+          } else if (
+            loginMenu === '1' ||
+            loginMenu.toLowerCase() === 'withdraw'
+          ) {
+            let withdrawAmount
+            let successWithdraw = false
+            while (true) {
+              withdrawAmount = prompt('How much do you want to withdraw?')
+              if (withdrawAmount === null || goBack(withdrawAmount)) {
+                break
+              }
+              withdrawAmount = Number(withdrawAmount)
+              if (isNaN(withdrawAmount) || withdrawAmount <= 0) {
+                alert('Invalid amount. Please enter a number greater than 0.')
+                continue
+              }
+              if (withdrawAmount > loggedInUser.balance) {
+                alert('Transaction failed: Insufficient funds.')
+                continue
+              }
+              loggedInUser.balance -= withdrawAmount
+              alert(
+                `Withdrawal successful. New balance: ${loggedInUser.balance}`
+              )
+              successWithdraw = true
+              break
+            }
+            if (successWithdraw) {
+              localStorage.setItem('users', JSON.stringify(users))
+            }
+          }
         }
       }
       break
