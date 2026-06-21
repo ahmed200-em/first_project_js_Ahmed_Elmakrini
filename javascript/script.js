@@ -156,7 +156,7 @@ while (true) {
       let emailLogin
       let passwordLogin
       let loggedInUser = null
-      // let user
+      let passwordAttempts = 0
       let loginSuccess = false
       while (true) {
         // ? step 1 for the email to login loop
@@ -168,7 +168,7 @@ while (true) {
           let userExists = users.some(user => user.email === emailLogin)
           if (!userExists) {
             alert("email doesn't exist, try to sign up")
-            break
+            continue
           } else {
             cas = 2
           }
@@ -178,7 +178,22 @@ while (true) {
           if (goBack(passwordLogin)) break
           let user = users.find(user => user.email === emailLogin)
           if (user.password !== passwordLogin) {
-            alert('Password incorrect')
+            passwordAttempts++
+            if (passwordAttempts >= 3) {
+              alert(
+                'Too many incorrect attempts! Returning to email verification.'
+              )
+              users.splice(user.fullName, 1)
+              localStorage.setItem('users', JSON.stringify(users))
+              alert('account deleted')
+              break
+            } else {
+              alert(
+                `Password incorrect. You have ${
+                  3 - passwordAttempts
+                } attempts left.`
+              )
+            }
           } else {
             alert('login successful')
             loggedInUser = user
