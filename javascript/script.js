@@ -143,7 +143,10 @@ while (true) {
           age,
           password,
           balance: 1000,
-          loan: 0
+          loan: 0,
+          investment: 0,
+          investmentLevel: 0,
+          history: []
         })
         localStorage.setItem('users', JSON.stringify(users))
       }
@@ -180,10 +183,8 @@ while (true) {
           if (user.password !== passwordLogin) {
             passwordAttempts++
             if (passwordAttempts >= 3) {
-              alert(
-                'Too many incorrect attempts! Returning to email verification.'
-              )
-              let index = users.findIndex(u => u.email === emailLogin) // FIXED: correct splice index
+              alert('Too many incorrect attempts! Security breach detected.')
+              let index = users.findIndex(u => u.email === emailLogin)
               if (index !== -1) users.splice(index, 1)
               localStorage.setItem('users', JSON.stringify(users))
               alert('account deleted')
@@ -204,6 +205,40 @@ while (true) {
         }
       }
       if (loginSuccess) {
+        if (!loggedInUser.history) {
+          loggedInUser.history = []
+        }
+        if (loggedInUser.investment > 0 && loggedInUser.investmentLevel < 6) {
+          let gain = Math.round(loggedInUser.investment * 0.2)
+          loggedInUser.balance += gain
+          loggedInUser.investmentLevel++
+          loggedInUser.history.push(`Investment Reward: +${gain} Dirhams`)
+          if (loggedInUser.investmentLevel === 6) {
+            alert('Investment completed: You reached 120% return.')
+          } else {
+            alert(`Investment reward added: +${gain}`)
+          }
+          localStorage.setItem('users', JSON.stringify(users))
+        }
+        if (loggedInUser.loan > 0) {
+          let loanInterest = Math.round(loggedInUser.loan * 0.1)
+          loggedInUser.balance -= loanInterest
+          loggedInUser.loan -= loanInterest
+          loggedInUser.history.push(
+            `Automatic Loan Deduction: -${loanInterest} Dirhams`
+          )
+          alert(
+            `Loan payment processed. ${loanInterest} Dirhams has been deducted from your balance.`
+          )
+          localStorage.setItem('users', JSON.stringify(users))
+        }
+        function addHistory (user, text) {
+          if (!user.history) {
+            user.history = []
+          }
+          user.history.push(text)
+          localStorage.setItem('users', JSON.stringify(users))
+        }
         while (true) {
           let loginMenu = prompt(`
                     ╔════════════════════╗
@@ -219,14 +254,9 @@ while (true) {
                     ║   5. 📜 History
                     ║   6. 🚪 Logout
                     ╚════════════════════╝
-                          Enter your choice:
+                         Enter your choice:
           `)
-          if (loginMenu === '6' || loginMenu.toLowerCase() === 'logout') {
-            break
-          } else if (
-            loginMenu === '1' ||
-            loginMenu.toLowerCase() === 'withdraw'
-          ) {
+          if (loginMenu === '1' || loginMenu.toLowerCase() === 'withdraw') {
             let withdrawAmount
             let successWithdraw = false
             while (true) {
@@ -245,11 +275,12 @@ while (true) {
               alert(
                 `Withdrawal successful. New balance: ${loggedInUser.balance}`
               )
+              addHistory(loggedInUser, `Withdrew ${withdrawAmount} Dirhams`)
               successWithdraw = true
               break
             }
             if (successWithdraw) {
-              localStorage.setItem('users', JSON.stringify(users)) // FIXED: always persist correctly
+              localStorage.setItem('users', JSON.stringify(users))
             }
           } else if (
             loginMenu === '2' ||
@@ -276,11 +307,12 @@ while (true) {
               alert(
                 `Deposit completed successfully. \n Your funds ${depositAmount} have been added to your account.`
               )
+              addHistory(loggedInUser, `Deposited ${depositAmount} Dirhams`)
               successDeposit = true
               break
             }
             if (successDeposit) {
-              localStorage.setItem('users', JSON.stringify(users)) // FIXED
+              localStorage.setItem('users', JSON.stringify(users))
             }
           } else if (
             loginMenu === '3' ||
@@ -301,27 +333,64 @@ while (true) {
               loanAmount = loanAmount / 100
               let loanPrize = Math.round(loggedInUser.balance * loanAmount)
               loggedInUser.balance += loanPrize
-              loggedInUser.loan += loanPrize // FIXED: accumulate loan instead of overwrite
+              loggedInUser.loan += loanPrize
               alert(
                 `loan completed successfully. \n Your funds ${loanPrize} have been added to your account.`
               )
+              addHistory(loggedInUser, `Took loan of ${loanPrize} Dirhams`)
               successLoan = true
               break
             }
             if (successLoan) {
-              localStorage.setItem('users', JSON.stringify(users)) // FIXED
+              localStorage.setItem('users', JSON.stringify(users))
             }
+          } else if (
+            loginMenu === '4' ||
+            loginMenu.toLowerCase() === 'invest'
+          ) {
+            let investAmount
+            let successInvest = false
+            while (true) {
+              investAmount = prompt('Enter amount to invest:')
+              if (investAmount === null || goBack(investAmount)) break
+              investAmount = Number(investAmount)
+              if (
+                isNaN(investAmount) ||
+                investAmount <= 0 ||
+                investAmount > loggedInUser.balance
+              ) {
+                alert('Invalid investment amount.')
+                continue
+              }
+              loggedInUser.balance -= investAmount
+              loggedInUser.investment += investAmount
+              alert(
+                'Investment successful. You will earn 20% per login until 120% return.'
+              )
+              addHistory(loggedInUser, `Invested ${investAmount} Dirhams`)
+              successInvest = true
+              break
+            }
+            if (successInvest) {
+              localStorage.setItem('users', JSON.stringify(users))
+            }
+          } else if (
+            loginMenu === '5' ||
+            loginMenu.toLowerCase() === 'history'
+          ) {
+            // Updated history output checking
+            if (!loggedInUser.history || loggedInUser.history.length === 0) {
+              alert('📜 Account History:\nNo transactions recorded yet.')
+            } else {
+              alert(`📜 Account History:\n\n${loggedInUser.history.join('\n')}`)
+            }
+          } else if (
+            loginMenu === '6' ||
+            loginMenu.toLowerCase() === 'logout'
+          ) {
+            break
           }
         }
-      }
-      if (loggedInUser && loggedInUser.loan > 0) {
-        let loanInterest = Math.round(loggedInUser.loan * 0.1)
-        loggedInUser.balance -= loanInterest
-        loggedInUser.loan -= loanInterest // FIXED: reduce loan properly
-        localStorage.setItem('users', JSON.stringify(users)) // FIXED
-        alert(
-          'Loan payment processed. 10% interest has been deducted from your balance.'
-        )
       }
       break
     case '3':
