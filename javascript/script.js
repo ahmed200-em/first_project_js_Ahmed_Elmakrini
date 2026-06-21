@@ -162,7 +162,9 @@ while (true) {
         // ? step 1 for the email to login loop
         if (cas === 1) {
           emailLogin = prompt('Please enter your email:')
-          if (goBack(emailLogin)) break
+          if (emailLogin === null || goBack(emailLogin)) {
+            break
+          }
           let userExists = users.some(user => user.email === emailLogin)
           if (!userExists) {
             alert("email doesn't exist, try to sign up")
@@ -211,6 +213,7 @@ while (true) {
           ) {
             let withdrawAmount
             let successWithdraw = false
+            let successDeposit = false
             while (true) {
               withdrawAmount = prompt('How much do you want to withdraw?')
               if (withdrawAmount === null || goBack(withdrawAmount)) {
@@ -233,6 +236,37 @@ while (true) {
               break
             }
             if (successWithdraw) {
+              localStorage.setItem('users', JSON.stringify(users))
+            }
+          } else if (
+            loginMenu === '2' ||
+            loginMenu.toLowerCase() === 'deposit'
+          ) {
+            let depositAmount
+            while (true) {
+              depositAmount = prompt('Enter the amount to deposit')
+              if (depositAmount === null || goBack(depositAmount)) {
+                break
+              }
+              depositAmount = Number(depositAmount)
+              if (
+                isNaN(depositAmount) ||
+                depositAmount <= 0 ||
+                depositAmount > 1000
+              ) {
+                alert(
+                  'Invalid amount. Please enter a number greater than 0 and lower then 1000 Dirhams'
+                )
+                continue
+              }
+              loggedInUser.balance += depositAmount
+              alert(
+                `Deposit completed successfully. \n Your funds ${depositAmount} have been added to your account.`
+              )
+              successDeposit = true
+              break
+            }
+            if (successDeposit) {
               localStorage.setItem('users', JSON.stringify(users))
             }
           }
