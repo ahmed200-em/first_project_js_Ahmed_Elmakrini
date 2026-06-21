@@ -77,8 +77,8 @@ while (true) {
       let confirmPassword
       let step = 1
       let signupDone = false
+
       while (true) {
-        // ? step 1 for the fullname loop
         if (step === 1) {
           fullName = prompt('Please enter your full name:')
           if (goBack(fullName)) break
@@ -138,11 +138,12 @@ while (true) {
       // and this after make sure the sign up made will save the user info in storage local
       if (signupDone) {
         users.push({
-          fullName: fullName,
-          email: email,
-          age: age,
-          password: password,
-          balance: 1000
+          fullName,
+          email,
+          age,
+          password,
+          balance: 1000,
+          loan: 0
         })
         localStorage.setItem('users', JSON.stringify(users))
       }
@@ -162,9 +163,8 @@ while (true) {
         // ? step 1 for the email to login loop
         if (cas === 1) {
           emailLogin = prompt('Please enter your email:')
-          if (emailLogin === null || goBack(emailLogin)) {
-            break
-          }
+          if (emailLogin === null || goBack(emailLogin)) break
+
           let userExists = users.some(user => user.email === emailLogin)
           if (!userExists) {
             alert("email doesn't exist, try to sign up")
@@ -183,7 +183,8 @@ while (true) {
               alert(
                 'Too many incorrect attempts! Returning to email verification.'
               )
-              users.splice(user.fullName, 1)
+              let index = users.findIndex(u => u.email === emailLogin) // FIXED: correct splice index
+              if (index !== -1) users.splice(index, 1)
               localStorage.setItem('users', JSON.stringify(users))
               alert('account deleted')
               break
@@ -228,12 +229,9 @@ while (true) {
           ) {
             let withdrawAmount
             let successWithdraw = false
-            let successDeposit = false
             while (true) {
               withdrawAmount = prompt('How much do you want to withdraw?')
-              if (withdrawAmount === null || goBack(withdrawAmount)) {
-                break
-              }
+              if (withdrawAmount === null || goBack(withdrawAmount)) break
               withdrawAmount = Number(withdrawAmount)
               if (isNaN(withdrawAmount) || withdrawAmount <= 0) {
                 alert('Invalid amount. Please enter a number greater than 0.')
@@ -251,18 +249,18 @@ while (true) {
               break
             }
             if (successWithdraw) {
-              localStorage.setItem('users', JSON.stringify(users))
+              localStorage.setItem('users', JSON.stringify(users)) // FIXED: always persist correctly
             }
           } else if (
             loginMenu === '2' ||
             loginMenu.toLowerCase() === 'deposit'
           ) {
             let depositAmount
+            let successDeposit = false
             while (true) {
               depositAmount = prompt('Enter the amount to deposit')
-              if (depositAmount === null || goBack(depositAmount)) {
-                break
-              }
+              if (depositAmount === null || goBack(depositAmount)) break
+
               depositAmount = Number(depositAmount)
               if (
                 isNaN(depositAmount) ||
@@ -282,13 +280,50 @@ while (true) {
               break
             }
             if (successDeposit) {
-              localStorage.setItem('users', JSON.stringify(users))
+              localStorage.setItem('users', JSON.stringify(users)) // FIXED
+            }
+          } else if (
+            loginMenu === '3' ||
+            loginMenu.toLowerCase() === 'take a loan'
+          ) {
+            let loanAmount
+            let successLoan = false
+            while (true) {
+              loanAmount = prompt('Enter the amount of loan with percentage %')
+              if (loanAmount === null || goBack(loanAmount)) break
+              loanAmount = Number(loanAmount)
+              if (isNaN(loanAmount) || loanAmount <= 0 || loanAmount > 20) {
+                alert(
+                  'Invalid loan. You can only ask for a loan between 0 and 20%'
+                )
+                continue
+              }
+              loanAmount = loanAmount / 100
+              let loanPrize = Math.round(loggedInUser.balance * loanAmount)
+              loggedInUser.balance += loanPrize
+              loggedInUser.loan += loanPrize // FIXED: accumulate loan instead of overwrite
+              alert(
+                `loan completed successfully. \n Your funds ${loanPrize} have been added to your account.`
+              )
+              successLoan = true
+              break
+            }
+            if (successLoan) {
+              localStorage.setItem('users', JSON.stringify(users)) // FIXED
             }
           }
         }
       }
+      if (loggedInUser && loggedInUser.loan > 0) {
+        let loanInterest = Math.round(loggedInUser.loan * 0.1)
+        loggedInUser.balance -= loanInterest
+        loggedInUser.loan -= loanInterest // FIXED: reduce loan properly
+        localStorage.setItem('users', JSON.stringify(users)) // FIXED
+        alert(
+          'Loan payment processed. 10% interest has been deducted from your balance.'
+        )
+      }
       break
-    // todo changing password case
     case '3':
     case 'Change Password':
     case 'change password':
@@ -327,7 +362,6 @@ while (true) {
         }
       }
       break
-    // todo exit case
     case '4':
     case 'Exit':
     case 'exit':
@@ -336,6 +370,7 @@ while (true) {
     default:
       alert('Invalid option! Returning to menu...')
   }
+
   if (action === '4' || action === 'exit' || action === 'Exit') {
     break
   }
